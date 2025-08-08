@@ -1,6 +1,13 @@
 import {ChangeDetectionStrategy, Component, signal} from '@angular/core'
 import {FormsModule} from '@angular/forms'
 
+type CharSet = {
+  id: string;
+  title: string;
+  chars: string;
+  active: boolean;
+}
+
 const LOWERCASE_LETTERS = 'abcdefghijklmnopqrstuvwxyz';
 const UPPERCASE_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const DIGITS = '0123456789';
@@ -16,32 +23,21 @@ const DEFAULT_PASSWORD_LENGTH = 12;
 export class PasswordGenerator {
   protected readonly password = signal('');
   protected readonly passwordLength = signal(DEFAULT_PASSWORD_LENGTH);
-  protected readonly includesLowercase = signal(true);
-  protected readonly includesUppercase = signal(false);
-  protected readonly includesDigits = signal(false);
-  protected readonly includesSymbols = signal(false);
+  protected readonly charSets = signal<CharSet[]>([
+    { id: 'includesLowercase', title: 'Lowercase (a-z)', chars: LOWERCASE_LETTERS, active: true },
+    { id: 'includesUppercase', title: 'Uppercase (A-Z)', chars: UPPERCASE_LETTERS, active: false },
+    { id: 'includesDigits', title: 'Digits (0-9)', chars: DIGITS, active: false },
+    { id: 'includesSymbols', title: 'Symbols (!-$^+)', chars: SYMBOLS, active: false },
+  ])
 
   protected generate(): void {
-    const charSets: string [] = [];
-    if (this.includesLowercase()) {
-      charSets.push(LOWERCASE_LETTERS);
-    }
-    if (this.includesUppercase()) {
-      charSets.push(UPPERCASE_LETTERS);
-    }
-    if (this.includesDigits()) {
-      charSets.push(DIGITS);
-    }
-    if (this.includesSymbols()) {
-      charSets.push(SYMBOLS);
-    }
-
-    const allChars = charSets.join('');
-    const remainingLength = this.passwordLength() - charSets.length;
+    const activeCharSets = this.charSets().filter((charSet) => charSet.active).map((charSet) => charSet.chars);
+    const allChars = activeCharSets.join('');
+    const remainingLength = this.passwordLength() - activeCharSets.length;
 
     const getRandomChar = () => allChars[this.getRandomInt(allChars.length)];
 
-    const randomChars = charSets
+    const randomChars = activeCharSets
       .map((charSet) => charSet[this.getRandomInt(charSet.length)])
       .concat(Array.from({ length: remainingLength }, getRandomChar))
       .sort(() => 0.5 - Math.random())

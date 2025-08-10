@@ -1,6 +1,10 @@
 import {ChangeDetectionStrategy, Component, signal} from '@angular/core'
 import {FormsModule} from '@angular/forms'
 
+import {
+  PasswordStrengthMeter
+} from '../password-strength-meter/password-strength-meter'
+
 type CharSet = {
   id: string;
   title: string;
@@ -17,7 +21,7 @@ const DEFAULT_PASSWORD_LENGTH = 12;
 @Component({
   selector: 'app-password-generator',
   templateUrl: './password-generator.html',
-  imports: [FormsModule],
+  imports: [FormsModule, PasswordStrengthMeter],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PasswordGenerator {

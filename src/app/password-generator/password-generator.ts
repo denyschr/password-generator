@@ -32,15 +32,20 @@ export class PasswordGenerator {
     { id: 'includesUppercase', title: 'Uppercase (A-Z)', chars: UPPERCASE_LETTERS, active: false },
     { id: 'includesDigits', title: 'Digits (0-9)', chars: DIGITS, active: false },
     { id: 'includesSymbols', title: 'Symbols (!-$^+)', chars: SYMBOLS, active: false },
-  ])
+  ]);
+  protected readonly error = signal(false);
 
   protected generate(): void {
+    this.error.set(false);
+
     const activeCharSets = this.charSets().filter((charSet) => charSet.active).map((charSet) => charSet.chars);
+    if (activeCharSets.length === 0) {
+      return this.error.set(true);
+    }
     const allChars = activeCharSets.join('');
     const remainingLength = this.passwordLength() - activeCharSets.length;
 
     const getRandomChar = () => allChars[this.getRandomInt(allChars.length)];
-
     const randomChars = activeCharSets
       .map((charSet) => charSet[this.getRandomInt(charSet.length)])
       .concat(Array.from({ length: remainingLength }, getRandomChar))
